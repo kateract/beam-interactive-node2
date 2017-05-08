@@ -21,11 +21,6 @@ const client = new GameClient();
 // Log when we're connected to interactive
 client.on('open', () => console.log('Connected to interactive'));
 
-// These can be un-commented to see the raw JSON messages under the hood
-client.on('message', (err: any) => console.log('<<<', err));
-client.on('send', (err: any) => console.log('>>>', err));
-// client.on('error', (err: any) => console.log(err));
-
 // Now we open the connection passing in our authentication details and an experienceId.
 client.open({
     authToken: process.argv[2],
@@ -81,12 +76,5 @@ client.createControls({
     });
     // Controls don't appear unless we tell Interactive that we are ready!
     client.ready(true);
-});
-
-client.state.on('participantJoin', participant => {
-    console.log(`${participant.username}(${participant.sessionID}) Joined`);
-});
-client.state.on('participantLeave', (participant: string ) => {
-    console.log(`${participant} Left`);
 });
 /* tslint:enable:no-console */

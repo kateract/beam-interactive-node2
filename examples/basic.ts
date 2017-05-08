@@ -4,10 +4,9 @@ import * as WebSocket from 'ws';
 import {
     GameClient,
     IButton,
-    IButtonData,
-    IControlData,
     setWebSocket,
 } from '../lib';
+import { makeButtons } from './util';
 
 if (process.argv.length < 5) {
     console.log('Usage gameClient.exe <token> <url> <experienceId>');
@@ -34,53 +33,11 @@ client.open({
     versionId: parseInt(process.argv[4], 10),
 });
 
-/**
- * This makes button objects, it will make the amount of buttons we tell it to
- * we'll use it to create controls dynamically!
- */
-function makeControls(amount: number): IControlData[] {
-    const controls: IButtonData[] = [];
-    const size = 10;
-    for (let i = 0; i < amount; i++) {
-        controls.push({
-            controlID: `${i}`,
-            kind: 'button',
-            text: `Button ${i}`,
-            cost: 1,
-            position: [
-                   {
-                       size: 'large',
-                       width: size,
-                       height: size / 2,
-                       x: i * size,
-                       y: 1,
-                   },
-                   {
-                       size: 'small',
-                       width: size,
-                       height: size / 2,
-                       x: i * size,
-                       y: 1,
-                   },
-                   {
-                       size: 'medium',
-                       width: size,
-                       height: size,
-                       x: i * size,
-                       y: 1,
-                   },
-               ],
-            },
-        );
-    }
-    return controls;
-}
-
 // Now we can create the controls, We need to add them to a scene though.
 // Every Interactive Experience has a "default" scene so we'll add them there there.
 client.createControls({
     sceneID: 'default',
-    controls: makeControls(5),
+    controls: makeButtons(5),
 }).then(controls => {
 
     // Now that the controls are created we can add some event listeners to them!

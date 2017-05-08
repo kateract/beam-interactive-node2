@@ -1,16 +1,13 @@
 /* tslint:disable:no-console */
-import * as WebSocket from 'ws';
-
 import * as faker from 'faker';
+import * as WebSocket from 'ws';
 
 import {
     delay,
     GameClient,
-    IButtonData,
-    IControlData,
-    IParticipant,
     setWebSocket,
 } from '../lib';
+import { makeButtons } from './util';
 
 if (process.argv.length < 5) {
     console.log('Usage gameClient.exe <token> <url> <experienceId>');
@@ -25,11 +22,6 @@ const client = new GameClient();
 // Log when we're connected to interactive
 client.on('open', () => console.log('Connected to interactive'));
 
-// These can be un-commented to see the raw JSON messages under the hood
-// client.on('message', (err: any) => console.log('<<<', err));
-// client.on('send', (err: any) => console.log('>>>', err));
-// client.on('error', (err: any) => console.log(err));
-
 // Now we open the connection passing in our authentication details and an experienceId.
 client.open({
     authToken: process.argv[2],
@@ -37,47 +29,6 @@ client.open({
     versionId: parseInt(process.argv[4], 10),
 });
 
-/**
- * This makes button objects, it will make the amount of buttons we tell it to
- * we'll use it to create controls dynamically!
- */
-function makeControls(amount: number): IControlData[] {
-    const controls: IButtonData[] = [];
-    const size = 10;
-    for (let i = 0; i < amount; i++) {
-        controls.push({
-            controlID: `${i}`,
-            kind: 'button',
-            text: faker.name.firstName(),
-            cost: 1,
-            position: [
-                   {
-                       size: 'large',
-                       width: size,
-                       height: size / 2,
-                       x: i * size,
-                       y: 1,
-                   },
-                   {
-                       size: 'small',
-                       width: size,
-                       height: size / 2,
-                       x: i * size,
-                       y: 1,
-                   },
-                   {
-                       size: 'medium',
-                       width: size,
-                       height: size,
-                       x: i * size,
-                       y: 1,
-                   },
-               ],
-            },
-        );
-    }
-    return controls;
-}
 const delayTime = 2000;
 
 /* Loop creates 5 controls and adds them to the default scene.
@@ -86,7 +37,7 @@ const delayTime = 2000;
 */
 function loop() {
     const scene = client.state.getScene('default');
-    scene.createControls(makeControls(5))
+    scene.createControls(makeButtons(5, () => faker.name.firstName()))
         .then(() => delay(delayTime))
         .then(() => scene.deleteAllControls())
         .then(() => delay(delayTime))
@@ -100,11 +51,4 @@ function loop() {
 client.synchronizeScenes()
     .then(() => client.ready(true))
     .then(() => loop());
-
-client.state.on('participantJoin', (participant: IParticipant ) => {
-    console.log(`${participant.username}(${participant.sessionID}) Joined`);
-});
-client.state.on('participantLeave', (participant: string ) => {
-    console.log(`${participant} Left`);
-});
 /* tslint:enable:no-console */
